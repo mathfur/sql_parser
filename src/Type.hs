@@ -2,9 +2,13 @@ module Type where
 
 data SQL = SQL [SelectStmt] deriving (Show, Eq)
 
-data SelectStmt = SelectStmt [Column] deriving (Show, Eq)
+data SelectStmt = SelectStmt [ResultColumn] JoinSource deriving (Show, Eq)
 
-data Column = Column String deriving (Show, Eq)
+data ResultColumn = ResultColumn String deriving (Show, Eq)
+
+data JoinSource = JoinSource String deriving (Show, Eq)
+
+
 
 --  data SelectStmt = SelectStmt [SelectCore] [OrderingTerm] (Just LimitExpr)
 --  
