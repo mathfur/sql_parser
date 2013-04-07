@@ -6,23 +6,26 @@ data SelectStmt = SelectStmt [ResultColumn] JoinSource deriving (Show, Eq)
 
 data ResultColumn = ResultColumn String deriving (Show, Eq)
 
-data JoinSource = JoinSource String deriving (Show, Eq)
+data JoinSource = JoinSource SingleSource [LatterSource] deriving (Show, Eq)
 
+data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Show, Eq)
 
+data JoinOp = Outer | Inner deriving (Show, Eq) -- OK
 
---  data SelectStmt = SelectStmt [SelectCore] [OrderingTerm] (Just LimitExpr)
---  
---  data SelectCore = SelectCore SelectDistinct [ResultColumn]
---     data SelectDistinct = All | Distinct
---     data ResultColumn = All
+data SingleSource = TableNameSingleSource TableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
+  -- TODO: SelectSingleSource SelectStmt (Maybe TableAlias) |
 
--- data OrderingTerm = OrderingTerm String
--- data LimitExpr = LimitExpr Int (Maybe Int)
+data TableAlias = TableAlias String deriving (Show, Eq)
 
--- data SqlStmtList = SqlStmtList [SqlStmt] deriving (Show, Eq)
--- data SqlStmt = SqlStmt String deriving (Show, Eq)
--- 
--- AlterTableStmt
+data TableName = TableName (Maybe String) String deriving (Show, Eq) -- DatabaseName + TableName
+
+data JoinConstraint =
+  OnConstraint String | -- TODO: change to expr
+  UsingConstraint [ColumnName]
+    deriving (Show, Eq)
+
+data ColumnName = ColumnName String deriving (Show, Eq)
+
 
 {-
 AnalyzeStmt
@@ -60,13 +63,7 @@ InsertStmt
 PragmaStmt
 PragmaValue
 ReindexStmt
-SelectStmt
 SelectCore
-ResultColumn
-JoinSource
-SingleSource
-JoinOp
-JoinConstraint
 OrderingTerm
 CompoundOperator
 UpdateStmt
