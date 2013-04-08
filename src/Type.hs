@@ -2,7 +2,11 @@ module Type where
 
 data SQL = SQL [SelectStmt] deriving (Show, Eq)
 
-data SelectStmt = SelectStmt [ResultColumn] JoinSource deriving (Show, Eq)
+data SelectStmt = SelectStmt SelectCore (Maybe LimitTerm) deriving (Show, Eq)
+
+data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
+
+data SelectCore = SelectCore [ResultColumn] JoinSource deriving (Show, Eq)
 
 data ResultColumn = ResultColumn String deriving (Show, Eq)
 
@@ -25,6 +29,8 @@ data JoinConstraint =
     deriving (Show, Eq)
 
 data ColumnName = ColumnName String deriving (Show, Eq)
+
+data Expr = Expr String deriving (Show, Eq)
 
 
 {-

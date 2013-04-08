@@ -1,6 +1,6 @@
 module Parser where
 
-import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parseTest, parse, ParseError, optionMaybe)
+import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parseTest, parse, ParseError, optionMaybe, try)
 import Text.Parsec.String (Parser)
 import Control.Applicative
 
@@ -10,16 +10,22 @@ sql :: Parser SQL
 sql = SQL <$> (select_stmt `sepBy` (c ';'))
 
 select_stmt :: Parser SelectStmt
-select_stmt = SelectStmt <$>
-    (str "SELECT" *> (result_column `sepBy` (c ',')) <* str "FROM" <* s)
+select_stmt = SelectStmt <$> select_core <*> (optionMaybe limit_term)
+
+select_core :: Parser SelectCore
+select_core = SelectCore <$>
+    (s *> str "SELECT" *> s *> (result_column `sepBy` (c ',')) <* s <* str "FROM" <* s)
     <*>
     join_source
+
+limit_term :: Parser LimitTerm
+limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> str "," *> expr)
 
 result_column :: Parser ResultColumn
 result_column = ResultColumn <$> (s *> many1 column_character <* s)
 
 join_source :: Parser JoinSource
-join_source = JoinSource <$> single_source <*> (many latter_source)
+join_source = JoinSource <$> single_source <*> (many (try latter_source))
   -- old: (s *> many1 alphaNum <* s)
 
 latter_source :: Parser LatterSource
@@ -30,7 +36,7 @@ latter_source = LatterSource <$>
   where
     join_op :: Parser JoinOp
     join_op = do
-      left <- optional (s *> str "LEFT" <* s)
+      left <- optionMaybe (s *> str "LEFT" <* s)
       outer_or_inner <- (s *> (choice [str "OUTER", str "INNER", str ""]) <* s)
       if (left == Just "LEFT") then
         return Outer
@@ -60,6 +66,9 @@ join_constraint =
 
 table_alias :: Parser TableAlias
 table_alias = TableAlias <$> (s *> many1 alphaNum <* s)
+
+expr :: Parser Expr
+expr = Expr <$> (s *> many1 alphaNum <* s)
 
 -------------------------------------------------
 column_character = char '*' <|> alphaNum

@@ -13,7 +13,18 @@ instance Formattable SQL where
   format (SQL select_stmts) = intercalate ";" $ map format select_stmts
 
 instance Formattable SelectStmt where
-  format (SelectStmt columns join_source) = joinBySp [
+  format (SelectStmt select_core Nothing) = format select_core
+  format (SelectStmt select_core (Just limit_term)) = joinBySp [
+      format select_core,
+      format limit_term
+    ]
+
+instance Formattable LimitTerm where
+  format (LimitTerm expr Nothing) = "LIMIT " ++ format expr
+  format (LimitTerm expr (Just offset)) = "LIMIT " ++ format expr ++ "," ++ format offset
+
+instance Formattable SelectCore where
+  format (SelectCore columns join_source) = joinBySp [
       "SELECT",
       intercalate "," $ map format columns,
       "FROM",
@@ -34,7 +45,7 @@ instance Formattable SingleSource where
   format (TableNameSingleSource table_name Nothing) = format table_name
   format (TableNameSingleSource table_name (Just alias_name)) = joinBySp [
       format table_name,
-      "AS", 
+      "AS",
       format alias_name
     ]
 
@@ -62,3 +73,6 @@ instance Formattable TableAlias where
 instance Formattable TableName where
   format (TableName (Just db_name) table_name) = db_name ++ "." ++ table_name
   format (TableName Nothing table_name) = table_name
+
+instance Formattable Expr where
+  format (Expr str) = str
