@@ -14,9 +14,11 @@ spec = do
     it "" $ (Parser.to_sql "SELECT id,name FROM users")
        `shouldBe`
        (Right $ SQL [
-          SelectStmt (SelectCore [ResultColumn "id", ResultColumn "name"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-            Nothing
+          SelectStmt (
+            SelectCore [ResultColumn "id", ResultColumn "name"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              Nothing
           )
           []
           Nothing
@@ -24,9 +26,11 @@ spec = do
     it "" $ (Parser.to_sql "SELECT id, name FROM users")
        `shouldBe`
        (Right $ SQL [
-         SelectStmt (SelectCore [ResultColumn "id", ResultColumn "name"]
-           (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-           Nothing
+         SelectStmt (
+           SelectCore [ResultColumn "id", ResultColumn "name"]
+             (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+             Nothing
+             Nothing
          )
          []
          Nothing
@@ -34,12 +38,14 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users")
        `shouldBe`
        (Right $ SQL [
-           SelectStmt (SelectCore [ResultColumn "*"] (
-             JoinSource
-               (TableNameSingleSource (TableName Nothing "users") Nothing)
-               []
-             )
-             Nothing
+           SelectStmt (
+             SelectCore [ResultColumn "*"]
+               (JoinSource
+                 (TableNameSingleSource (TableName Nothing "users") Nothing)
+                 []
+               )
+               Nothing
+               Nothing
            )
            []
            Nothing
@@ -47,12 +53,14 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users LEFT JOIN emails ON True")
        `shouldBe`
        (Right $ SQL [
-           SelectStmt (SelectCore [ResultColumn "*"] (
-             JoinSource
-               (TableNameSingleSource (TableName Nothing "users") Nothing)
-               [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
-             )
-             Nothing
+           SelectStmt (
+             SelectCore [ResultColumn "*"] (
+               JoinSource
+                 (TableNameSingleSource (TableName Nothing "users") Nothing)
+                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
+               )
+               Nothing
+               Nothing
            )
            []
            Nothing
@@ -60,9 +68,11 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users LIMIT 1")
        `shouldBe`
        (Right $ SQL [
-          SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-            Nothing
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              Nothing
           )
           []
           (Just (LimitTerm (Expr "1") Nothing))
@@ -70,12 +80,14 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users LEFT JOIN emails ON True LIMIT 1, 3")
        `shouldBe`
        (Right $ SQL [
-           SelectStmt (SelectCore [ResultColumn "*"] (
-             JoinSource
-               (TableNameSingleSource (TableName Nothing "users") Nothing)
-               [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
-             )
-             Nothing
+           SelectStmt (
+             SelectCore [ResultColumn "*"] (
+               JoinSource
+                 (TableNameSingleSource (TableName Nothing "users") Nothing)
+                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
+               )
+               Nothing
+               Nothing
            )
            []
            (Just (LimitTerm (Expr "1") (Just (Expr "3"))))
@@ -83,9 +95,11 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users ORDER BY id")
        `shouldBe`
        (Right $ SQL [
-          SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-            Nothing
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              Nothing
           )
           [OrderingTerm (Expr "id") Asc]
           Nothing
@@ -93,9 +107,11 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users ORDER BY name DESC")
        `shouldBe`
        (Right $ SQL [
-          SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-            Nothing
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              Nothing
           )
           [OrderingTerm (Expr "name") Desc]
           Nothing
@@ -103,9 +119,35 @@ spec = do
     it "" $ (Parser.to_sql "SELECT * FROM users WHERE True")
        `shouldBe`
        (Right $ SQL [
-          SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
-            (Just $ WhereTerm (Expr "True"))
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              (Just $ WhereTerm (Expr "True"))
+              Nothing
+          )
+          []
+          Nothing
+       ])
+    it "" $ (Parser.to_sql "SELECT * FROM users GROUP BY name")
+       `shouldBe`
+       (Right $ SQL [
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              (Just $ GroupTerm [Expr "name"] Nothing)
+          )
+          []
+          Nothing
+       ])
+    it "" $ (Parser.to_sql "SELECT * FROM users GROUP BY name HAVING True")
+       `shouldBe`
+       (Right $ SQL [
+          SelectStmt (
+            SelectCore [ResultColumn "*"]
+              (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+              Nothing
+              (Just $ GroupTerm [Expr "name"] (Just $ Expr "True"))
           )
           []
           Nothing

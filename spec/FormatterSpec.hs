@@ -11,6 +11,7 @@ spec = do
                SelectCore [ResultColumn "id", ResultColumn "name"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
                  Nothing
+                 Nothing
                )
                []
                Nothing
@@ -20,6 +21,7 @@ spec = do
     it "" $ (Formatter.format $ SQL [SelectStmt (
                  SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
                  Nothing
                )
                []
@@ -34,6 +36,7 @@ spec = do
                     [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "emails.user_id = users.id")]
                   )
                   Nothing
+                  Nothing
                 )
                 []
                 Nothing
@@ -43,6 +46,7 @@ spec = do
     it "" $ (Formatter.format $ SQL [SelectStmt (
                SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
                  Nothing
                )
                []
@@ -54,6 +58,7 @@ spec = do
                SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
                  Nothing
+                 Nothing
                )
                []
                (Just (LimitTerm (Expr "1") (Just (Expr "2"))))
@@ -63,6 +68,7 @@ spec = do
     it "" $ (Formatter.format $ SQL [SelectStmt (
                SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
                  Nothing
                )
                [OrderingTerm (Expr "id") Asc]
@@ -74,6 +80,7 @@ spec = do
                SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
                  Nothing
+                 Nothing
                )
                [OrderingTerm (Expr "name") Desc]
                Nothing
@@ -84,9 +91,32 @@ spec = do
                SelectCore [ResultColumn "*"]
                  (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
                  (Just $ WhereTerm (Expr "True"))
+                 Nothing
                )
                []
                Nothing
             ])
       `shouldBe`
       "SELECT * FROM users WHERE True"
+    it "" $ (Formatter.format $ SQL [SelectStmt (
+               SelectCore [ResultColumn "*"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+                 (Just $ GroupTerm [Expr "name"] Nothing)
+               )
+               []
+               Nothing
+            ])
+      `shouldBe`
+      "SELECT * FROM users GROUP BY name"
+    it "" $ (Formatter.format $ SQL [SelectStmt (
+               SelectCore [ResultColumn "*"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+                 (Just $ GroupTerm [Expr "name"] (Just $ Expr "True"))
+               )
+               []
+               Nothing
+            ])
+      `shouldBe`
+      "SELECT * FROM users GROUP BY name HAVING True"

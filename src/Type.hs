@@ -10,13 +10,15 @@ data Order = Asc | Desc deriving (Show, Eq)
 
 data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
 
-data SelectCore = SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) deriving (Show, Eq)
+data SelectCore = SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm) deriving (Show, Eq)
 
 data ResultColumn = ResultColumn String deriving (Show, Eq)
 
 data JoinSource = JoinSource SingleSource [LatterSource] deriving (Show, Eq)
 
 data WhereTerm = WhereTerm Expr deriving (Show, Eq)
+
+data GroupTerm = GroupTerm [Expr] (Maybe Expr) deriving (Show, Eq)
 
 data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Show, Eq)
 

@@ -22,12 +22,17 @@ select_core = SelectCore <$>
     join_source
     <*>
     (optionMaybe (try where_term))
+    <*>
+    (optionMaybe (try group_term))
 
 result_column :: Parser ResultColumn
 result_column = ResultColumn <$> (s *> many1 column_character <* s)
 
 where_term :: Parser WhereTerm
 where_term = WhereTerm <$> (s *> str "WHERE" *> s *> expr)
+
+group_term :: Parser GroupTerm
+group_term = GroupTerm <$> (s *> str "GROUP" *> s *> str "BY" *> (expr `sepBy` (c ','))) <*> (optionMaybe (str "HAVING" *> expr))
 
 ordering_term :: Parser OrderingTerm
 ordering_term = OrderingTerm <$> (s *> str "ORDER" *> s *> str "BY" *> s *> expr) <*> order
