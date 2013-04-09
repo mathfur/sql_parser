@@ -15,8 +15,9 @@ spec = do
        `shouldBe`
        (Right $ SQL [
           SelectStmt (SelectCore [ResultColumn "id", ResultColumn "name"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-          ))
+            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+            Nothing
+          )
           []
           Nothing
        ])
@@ -24,8 +25,9 @@ spec = do
        `shouldBe`
        (Right $ SQL [
          SelectStmt (SelectCore [ResultColumn "id", ResultColumn "name"]
-           (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-         ))
+           (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+           Nothing
+         )
          []
          Nothing
        ])
@@ -36,7 +38,9 @@ spec = do
              JoinSource
                (TableNameSingleSource (TableName Nothing "users") Nothing)
                []
-           ))
+             )
+             Nothing
+           )
            []
            Nothing
          ])
@@ -47,7 +51,9 @@ spec = do
              JoinSource
                (TableNameSingleSource (TableName Nothing "users") Nothing)
                [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
-           ))
+             )
+             Nothing
+           )
            []
            Nothing
          ])
@@ -55,8 +61,9 @@ spec = do
        `shouldBe`
        (Right $ SQL [
           SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-          ))
+            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+            Nothing
+          )
           []
           (Just (LimitTerm (Expr "1") Nothing))
        ])
@@ -67,7 +74,9 @@ spec = do
              JoinSource
                (TableNameSingleSource (TableName Nothing "users") Nothing)
                [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
-           ))
+             )
+             Nothing
+           )
            []
            (Just (LimitTerm (Expr "1") (Just (Expr "3"))))
          ])
@@ -75,8 +84,9 @@ spec = do
        `shouldBe`
        (Right $ SQL [
           SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-          ))
+            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+            Nothing
+          )
           [OrderingTerm (Expr "id") Asc]
           Nothing
        ])
@@ -84,8 +94,19 @@ spec = do
        `shouldBe`
        (Right $ SQL [
           SelectStmt (SelectCore [ResultColumn "*"]
-            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-          ))
+            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+            Nothing
+          )
           [OrderingTerm (Expr "name") Desc]
+          Nothing
+       ])
+    it "" $ (Parser.to_sql "SELECT * FROM users WHERE True")
+       `shouldBe`
+       (Right $ SQL [
+          SelectStmt (SelectCore [ResultColumn "*"]
+            (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+            (Just $ WhereTerm (Expr "True"))
+          )
+          []
           Nothing
        ])

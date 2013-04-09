@@ -12,11 +12,22 @@ sql = SQL <$> (select_stmt `sepBy` (c ';'))
 select_stmt :: Parser SelectStmt
 select_stmt = SelectStmt <$> select_core <*> (many $ try ordering_term) <*> (optionMaybe limit_term)
 
+limit_term :: Parser LimitTerm
+limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> str "," *> expr)
+
 select_core :: Parser SelectCore
 select_core = SelectCore <$>
     (s *> str "SELECT" *> s *> (result_column `sepBy` (c ',')) <* s <* str "FROM" <* s)
     <*>
     join_source
+    <*>
+    (optionMaybe (try where_term))
+
+result_column :: Parser ResultColumn
+result_column = ResultColumn <$> (s *> many1 column_character <* s)
+
+where_term :: Parser WhereTerm
+where_term = WhereTerm <$> (s *> str "WHERE" *> s *> expr)
 
 ordering_term :: Parser OrderingTerm
 ordering_term = OrderingTerm <$> (s *> str "ORDER" *> s *> str "BY" *> s *> expr) <*> order
@@ -27,13 +38,6 @@ order = do
   case order_string of
     "DESC" -> return Desc
     _ -> return Asc
-
-
-limit_term :: Parser LimitTerm
-limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> str "," *> expr)
-
-result_column :: Parser ResultColumn
-result_column = ResultColumn <$> (s *> many1 column_character <* s)
 
 join_source :: Parser JoinSource
 join_source = JoinSource <$> single_source <*> (many (try latter_source))

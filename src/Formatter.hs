@@ -7,6 +7,14 @@ import Data.Maybe
 joinBySp :: [String] -> String
 joinBySp strs = intercalate " " strs
 
+addPrefix :: String -> Maybe String -> String
+addPrefix prefix (Just cs) = prefix ++ cs
+addPrefix prefix Nothing = ""
+
+addPrefixA :: String -> Maybe String -> [String]
+addPrefixA prefix (Just cs) = [prefix ++ cs]
+addPrefixA prefix Nothing = []
+
 class Formattable a where
   format :: a -> String
 
@@ -34,12 +42,15 @@ instance Formattable LimitTerm where
   format (LimitTerm expr (Just offset)) = "LIMIT " ++ format expr ++ "," ++ format offset
 
 instance Formattable SelectCore where
-  format (SelectCore columns join_source) = joinBySp [
+  format (SelectCore columns join_source where_term) = joinBySp $ [
       "SELECT",
       intercalate "," $ map format columns,
       "FROM",
       format join_source
-    ]
+    ] ++ (addPrefixA "WHERE " $ fmap format where_term)
+
+instance Formattable WhereTerm where
+  format (WhereTerm expr) = format expr
 
 instance Formattable ResultColumn where
   format (ResultColumn str) = str

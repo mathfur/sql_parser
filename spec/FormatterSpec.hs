@@ -8,14 +8,20 @@ spec :: Spec
 spec = do
   describe "" $ do
     it "" $ (Formatter.format $ SQL [SelectStmt (
-               SelectCore [ResultColumn "id", ResultColumn "name"] (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []))
+               SelectCore [ResultColumn "id", ResultColumn "name"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                []
                Nothing
             ])
       `shouldBe`
       "SELECT id,name FROM users"
     it "" $ (Formatter.format $ SQL [SelectStmt (
-               SelectCore [ResultColumn "*"] (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []))
+                 SelectCore [ResultColumn "*"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                []
                Nothing
             ])
@@ -26,16 +32,19 @@ spec = do
                   JoinSource
                     (TableNameSingleSource (TableName Nothing "users") Nothing)
                     [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "emails.user_id = users.id")]
-                ))
+                  )
+                  Nothing
+                )
                 []
                 Nothing
               ])
       `shouldBe`
       "SELECT * FROM users LEFT JOIN emails ON emails.user_id = users.id"
     it "" $ (Formatter.format $ SQL [SelectStmt (
-               SelectCore [ResultColumn "*"] (
-                 JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-               ))
+               SelectCore [ResultColumn "*"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                []
                (Just (LimitTerm (Expr "1") Nothing))
             ])
@@ -43,8 +52,9 @@ spec = do
       "SELECT * FROM users LIMIT 1"
     it "" $ (Formatter.format $ SQL [SelectStmt (
                SelectCore [ResultColumn "*"]
-                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-               ))
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                []
                (Just (LimitTerm (Expr "1") (Just (Expr "2"))))
             ])
@@ -52,8 +62,9 @@ spec = do
       "SELECT * FROM users LIMIT 1,2"
     it "" $ (Formatter.format $ SQL [SelectStmt (
                SelectCore [ResultColumn "*"]
-                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-               ))
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                [OrderingTerm (Expr "id") Asc]
                Nothing
             ])
@@ -61,10 +72,21 @@ spec = do
       "SELECT * FROM users ORDER BY id ASC"
     it "" $ (Formatter.format $ SQL [SelectStmt (
                SelectCore [ResultColumn "*"]
-                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) []
-               ))
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 Nothing
+               )
                [OrderingTerm (Expr "name") Desc]
                Nothing
             ])
       `shouldBe`
       "SELECT * FROM users ORDER BY name DESC"
+    it "" $ (Formatter.format $ SQL [SelectStmt (
+               SelectCore [ResultColumn "*"]
+                 (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                 (Just $ WhereTerm (Expr "True"))
+               )
+               []
+               Nothing
+            ])
+      `shouldBe`
+      "SELECT * FROM users WHERE True"
