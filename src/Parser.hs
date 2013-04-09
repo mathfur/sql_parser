@@ -10,13 +10,24 @@ sql :: Parser SQL
 sql = SQL <$> (select_stmt `sepBy` (c ';'))
 
 select_stmt :: Parser SelectStmt
-select_stmt = SelectStmt <$> select_core <*> (optionMaybe limit_term)
+select_stmt = SelectStmt <$> select_core <*> (many $ try ordering_term) <*> (optionMaybe limit_term)
 
 select_core :: Parser SelectCore
 select_core = SelectCore <$>
     (s *> str "SELECT" *> s *> (result_column `sepBy` (c ',')) <* s <* str "FROM" <* s)
     <*>
     join_source
+
+ordering_term :: Parser OrderingTerm
+ordering_term = OrderingTerm <$> (s *> str "ORDER" *> s *> str "BY" *> s *> expr) <*> order
+
+order :: Parser Order
+order = do
+  order_string <- (s *> choice [str "ASC", str "DESC", str ""] <* s)
+  case order_string of
+    "DESC" -> return Desc
+    _ -> return Asc
+
 
 limit_term :: Parser LimitTerm
 limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> str "," *> expr)
@@ -44,12 +55,12 @@ latter_source = LatterSource <$>
         return Outer
       else
         return Inner
-    
-single_source :: Parser SingleSource    
+
+single_source :: Parser SingleSource
 single_source =
   (TableNameSingleSource <$> table_name <*> (optional (str "AS" *> s *> table_alias))) <|>
   (JoinSingleSource <$> join_source)
-    where  
+    where
       table_name :: Parser TableName
       table_name =
         (TableName Nothing <$> (many1 alphaNum)) <|>

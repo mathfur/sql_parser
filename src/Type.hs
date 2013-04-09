@@ -2,7 +2,11 @@ module Type where
 
 data SQL = SQL [SelectStmt] deriving (Show, Eq)
 
-data SelectStmt = SelectStmt SelectCore (Maybe LimitTerm) deriving (Show, Eq)
+data SelectStmt = SelectStmt SelectCore [OrderingTerm] (Maybe LimitTerm) deriving (Show, Eq)
+
+data OrderingTerm = OrderingTerm Expr Order deriving (Show, Eq)
+
+data Order = Asc | Desc deriving (Show, Eq)
 
 data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
 

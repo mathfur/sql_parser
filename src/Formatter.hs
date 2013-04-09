@@ -2,6 +2,7 @@ module Formatter where
 
 import Type
 import Data.List
+import Data.Maybe
 
 joinBySp :: [String] -> String
 joinBySp strs = intercalate " " strs
@@ -13,11 +14,20 @@ instance Formattable SQL where
   format (SQL select_stmts) = intercalate ";" $ map format select_stmts
 
 instance Formattable SelectStmt where
-  format (SelectStmt select_core Nothing) = format select_core
-  format (SelectStmt select_core (Just limit_term)) = joinBySp [
-      format select_core,
-      format limit_term
+  format (SelectStmt select_core ordering_term limit_term) = joinBySp $
+    [format select_core] ++
+    (if length ordering_term == 0 then [] else ["ORDER BY " ++ (intercalate "," $ map format ordering_term)])
+    ++ (map format $ maybeToList limit_term)
+
+instance Formattable OrderingTerm where
+  format (OrderingTerm expr order) = joinBySp [
+      format expr,
+      format order
     ]
+
+instance Formattable Order where
+  format Asc = "ASC"
+  format Desc = "DESC"
 
 instance Formattable LimitTerm where
   format (LimitTerm expr Nothing) = "LIMIT " ++ format expr
