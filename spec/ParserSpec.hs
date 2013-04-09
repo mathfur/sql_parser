@@ -152,3 +152,23 @@ spec = do
           []
           Nothing
        ])
+    it "" $ (Parser.to_sql "SELECT id,name FROM users; SELECT * FROM groups")
+       `shouldBe`
+       (Right $ SQL [
+           SelectStmt (
+             SelectCore [ResultColumn "id", ResultColumn "name"]
+               (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+               Nothing
+               Nothing
+           )
+           []
+           Nothing,
+           SelectStmt (
+             SelectCore [ResultColumn "*"]
+               (JoinSource (TableNameSingleSource (TableName Nothing "groups") Nothing) [])
+               Nothing
+               Nothing
+           )
+           []
+           Nothing
+         ])

@@ -120,3 +120,23 @@ spec = do
             ])
       `shouldBe`
       "SELECT * FROM users GROUP BY name HAVING True"
+    it "" $ (Formatter.format $ SQL [
+               SelectStmt (
+                 SelectCore [ResultColumn "id", ResultColumn "name"]
+                   (JoinSource (TableNameSingleSource (TableName Nothing "users") Nothing) [])
+                   Nothing
+                   Nothing
+               )
+               []
+               Nothing,
+               SelectStmt (
+                 SelectCore [ResultColumn "*"]
+                   (JoinSource (TableNameSingleSource (TableName Nothing "groups") Nothing) [])
+                   Nothing
+                   Nothing
+               )
+               []
+               Nothing
+            ])
+      `shouldBe`
+      "SELECT id,name FROM users; SELECT * FROM groups"

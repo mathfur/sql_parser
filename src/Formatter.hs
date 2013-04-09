@@ -19,7 +19,7 @@ class Formattable a where
   format :: a -> String
 
 instance Formattable SQL where
-  format (SQL select_stmts) = intercalate ";" $ map format select_stmts
+  format (SQL select_stmts) = intercalate "; " $ map format select_stmts
 
 instance Formattable SelectStmt where
   format (SelectStmt select_core ordering_term limit_term) = joinBySp $
