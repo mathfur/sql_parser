@@ -86,7 +86,7 @@ instance Formattable JoinOp where
   format Outer = "LEFT JOIN"
 
 instance Formattable JoinConstraint where
-  format (OnConstraint str) = "ON " ++ str
+  format (OnConstraint expr) = "ON " ++ format expr
   format (UsingConstraint column_names) = "Using " ++ (joinBySp $ map format column_names)
 
 instance Formattable ColumnName where

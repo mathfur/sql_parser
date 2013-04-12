@@ -32,7 +32,7 @@ data TableAlias = TableAlias String deriving (Show, Eq)
 data TableName = TableName (Maybe String) String deriving (Show, Eq) -- DatabaseName + TableName
 
 data JoinConstraint =
-  OnConstraint String | -- TODO: change to expr
+  OnConstraint Expr |
   UsingConstraint [ColumnName]
     deriving (Show, Eq)
 

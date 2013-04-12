@@ -57,7 +57,7 @@ spec = do
              SelectCore [ResultColumn "*"] (
                JoinSource
                  (TableNameSingleSource (TableName Nothing "users") Nothing)
-                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
+                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint $ Expr "True")]
                )
                Nothing
                Nothing
@@ -84,7 +84,7 @@ spec = do
              SelectCore [ResultColumn "*"] (
                JoinSource
                  (TableNameSingleSource (TableName Nothing "users") Nothing)
-                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "True")]
+                 [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint $ Expr "True")]
                )
                Nothing
                Nothing

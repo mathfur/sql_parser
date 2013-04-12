@@ -33,7 +33,7 @@ spec = do
                 SelectCore [ResultColumn "*"] (
                   JoinSource
                     (TableNameSingleSource (TableName Nothing "users") Nothing)
-                    [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint "emails.user_id = users.id")]
+                    [LatterSource Outer (TableNameSingleSource (TableName Nothing "emails") Nothing) (OnConstraint $ Expr "emails.user_id = users.id")]
                   )
                   Nothing
                   Nothing

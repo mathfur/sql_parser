@@ -1,6 +1,6 @@
 module Parser where
 
-import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parseTest, parse, ParseError, optionMaybe, try)
+import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parse, ParseError, optionMaybe, try)
 import Text.Parsec.String (Parser)
 import Control.Applicative
 
@@ -77,7 +77,7 @@ single_source =
 
 join_constraint :: Parser JoinConstraint
 join_constraint =
-  OnConstraint <$> (s *> (str "ON") *> s *> (many1 alphaNum) <* s)
+  OnConstraint <$> (s *> (str "ON") *> s *> expr <* s)
   <|>
   UsingConstraint <$> (s *> (str "USING") *> s *> (many1 column_name) <* s)
     where
@@ -91,10 +91,16 @@ expr :: Parser Expr
 expr = Expr <$> (s *> many1 alphaNum <* s)
 
 -------------------------------------------------
+column_character :: Parser Char
 column_character = char '*' <|> alphaNum
 -------------------------------------------------
+s :: Parser ()
 s = spaces
+
+c :: Char -> Parser Char
 c = char
+
+str :: String -> Parser String
 str = string
 
 -------------------------------------------------
