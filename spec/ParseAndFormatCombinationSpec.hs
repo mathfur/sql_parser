@@ -28,12 +28,24 @@ import Text.Parsec (ParseError)
 prop_to_sql_format :: SQL -> Bool
 prop_to_sql_format sql_ = (sql_ == getRightValue (Parser.to_sql (Formatter.format sql_)))
 
+prop_format_to_sql :: String -> Bool
+prop_format_to_sql sql_string = (sql_string == Formatter.format (getRightValue (Parser.to_sql sql_string)))
+
 getRightValue :: Either ParseError SQL -> SQL
 getRightValue (Right x) = x
 getRightValue (Left _) = SQL []
 
 spec :: Spec
 spec = do
- describe "" $ do
-         it "" $ True `shouldBe` True
---   prop "" prop_to_sql_format
+    describe "" $ do
+        it "" $ prop_format_to_sql "SELECT id,name FROM users" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users LEFT JOIN emails ON 1" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users LIMIT 1" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users LIMIT 1,2" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users ORDER BY 1 ASC" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users ORDER BY 1 DESC" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users WHERE 1" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users GROUP BY 1" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT * FROM users GROUP BY 1 HAVING 3" `shouldBe` True
+        it "" $ prop_format_to_sql "SELECT id,name FROM users; SELECT * FROM groups" `shouldBe` True
