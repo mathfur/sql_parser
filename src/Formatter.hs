@@ -100,4 +100,30 @@ instance Formattable TableName where
   format (TableName Nothing table_name) = table_name
 
 instance Formattable Expr where
-  format (Expr str) = str
+    format (ColumnNameExpr (Just db_name) (Just table_name_) column_name)  = format db_name ++ "." ++ format table_name_ ++ "." ++ format column_name
+    format (ColumnNameExpr Nothing (Just table_name_) column_name) = format table_name_ ++ "." ++ format column_name
+    format (ColumnNameExpr (Just db_name) Nothing column_name) = format db_name ++ "." ++ format column_name
+    format (ColumnNameExpr Nothing Nothing column_name) = format column_name
+    format (UnaryOperatoredExpr unary_operator expr) = format unary_operator ++ " " ++ format expr
+    format (PlusOp expr1 expr2) = "(" ++ format expr1 ++ " + " ++ format expr2 ++ ")"
+    format (MinusOp expr1 expr2) = "(" ++ format expr1 ++ " - " ++ format expr2 ++ ")"
+    format (MultipleOp expr1 expr2) = format expr1 ++ " * " ++ format expr2
+    format (DivideOp expr1 expr2) = format expr1 ++ " / " ++ format expr2
+    format (LiteralValue literal_value) = format literal_value
+
+instance Formattable LiteralValue where
+    format (NumericLiteral str) = str
+    format (StringLiteral str)  = "\"" ++ escape_inner_string(str) ++ "\""
+    format Null                 = "NULL"
+
+instance Formattable UnaryOperator where
+    format NotOp = "NOT"
+
+instance Formattable TableName_ where
+  format (TableName_ str) = str
+
+instance Formattable DbName where
+  format (DbName str) = str
+
+escape_inner_string :: String -> String
+escape_inner_string = concatMap (\c -> if c == '"' then "\\\"" else [c])

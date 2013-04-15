@@ -6,7 +6,9 @@ main :: IO ()
 main = do
   sql <- getContents
   case (Parser.to_sql sql) of
-    Right e -> putStrLn $ Formatter.format e
+    Right e -> do
+      print e
+      print $ Formatter.format e
     Left e -> do
       print "(error)"
       print e

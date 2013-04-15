@@ -29,17 +29,37 @@ data SingleSource = TableNameSingleSource TableName (Maybe TableAlias) | JoinSin
 
 data TableAlias = TableAlias String deriving (Show, Eq)
 
-data TableName = TableName (Maybe String) String deriving (Show, Eq) -- DatabaseName + TableName
 
 data JoinConstraint =
   OnConstraint Expr |
   UsingConstraint [ColumnName]
     deriving (Show, Eq)
 
+
+--------------------------------------------------
+-- | about Expr
+
+data Expr = LiteralValue LiteralValue
+          | ColumnNameExpr (Maybe DbName) (Maybe TableName_) ColumnName
+          | UnaryOperatoredExpr UnaryOperator Expr
+          | PlusOp Expr Expr
+          | MinusOp Expr Expr
+          | MultipleOp Expr Expr
+          | DivideOp Expr Expr
+            deriving (Show, Eq)
+
+data LiteralValue = NumericLiteral String
+                 | StringLiteral String
+                 | Null
+                 deriving (Show, Eq)
+
+data UnaryOperator = NotOp deriving (Show, Eq)
+
+data TableName = TableName (Maybe String) String deriving (Show, Eq) -- DatabaseName + TableName
+
+data DbName = DbName String deriving (Show, Eq)
+data TableName_ = TableName_ String deriving (Show, Eq)
 data ColumnName = ColumnName String deriving (Show, Eq)
-
-data Expr = Expr String deriving (Show, Eq)
-
 
 {-
 AnalyzeStmt
@@ -70,8 +90,6 @@ DropTableStmt
 DropTriggerStmt
 DropViewStmt
 RaiseFunction
-LiteralValue
-NumericLiteral
 InsertStmt
 PragmaStmt
 PragmaValue

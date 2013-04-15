@@ -9,24 +9,8 @@ import Test.QuickCheck()
 import Parser
 import Formatter
 import Type
-import Arbitrary
 
 import Text.Parsec (ParseError)
-
--- instance Eq ParseError where
---   _ == __ = False
-
---instance Testable SQL where
---  property (SQL qs) = result $ nothing { ok = Nothing }
-
--- 現状cabal testでは動作しないので以下の手順でテストする.
---  1. $ ghci -isrc -ispec
---  2. Prelude> :m Test.QuickCheck
---  3. Prelude Test.QuickCheck> :load "spec/ParseAndFormatCombinationSpec.hs"
---  4. quickCheck prop_to_sql_format
-
-prop_to_sql_format :: SQL -> Bool
-prop_to_sql_format sql_ = (sql_ == getRightValue (Parser.to_sql (Formatter.format sql_)))
 
 prop_format_to_sql :: String -> Bool
 prop_format_to_sql sql_string = (sql_string == Formatter.format (getRightValue (Parser.to_sql sql_string)))
@@ -38,14 +22,27 @@ getRightValue (Left _) = SQL []
 spec :: Spec
 spec = do
     describe "" $ do
-        it "" $ prop_format_to_sql "SELECT id,name FROM users" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users LEFT JOIN emails ON 1" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users LIMIT 1" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users LIMIT 1,2" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users ORDER BY 1 ASC" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users ORDER BY 1 DESC" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users WHERE 1" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users GROUP BY 1" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT * FROM users GROUP BY 1 HAVING 3" `shouldBe` True
-        it "" $ prop_format_to_sql "SELECT id,name FROM users; SELECT * FROM groups" `shouldBe` True
+        it "" $ to_sql_and_format "SELECT id,name FROM users"
+        it "" $ to_sql_and_format "SELECT id FROM users"
+        it "" $ to_sql_and_format "SELECT id FROM users LEFT JOIN emails ON 1"
+        it "" $ to_sql_and_format "SELECT id FROM users LIMIT 1"
+        it "" $ to_sql_and_format "SELECT id FROM users LIMIT 1,2"
+        it "" $ to_sql_and_format "SELECT id FROM users ORDER BY 1 ASC"
+        it "" $ to_sql_and_format "SELECT id FROM users ORDER BY 1 DESC"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE 1"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE NOT 1"    -- NG WHERE-
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE (123 + 456)"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE users.age * 3"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE (1 + users.age * 3)"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE (users.age + users.age)"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE \"foo\" * db_foo.users.age"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE \"foo\""
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE \"f\\\"oo\""
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE db_foo.users.email"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE users.email"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE email"
+        it "" $ to_sql_and_format "SELECT id FROM users GROUP BY 1"
+        it "" $ to_sql_and_format "SELECT id FROM users GROUP BY 1 HAVING 3"
+        it "" $ to_sql_and_format "SELECT id,name FROM users; SELECT id FROM groups"
+          where
+            to_sql_and_format query = (Formatter.format (getRightValue (Parser.to_sql query))) `shouldBe` query

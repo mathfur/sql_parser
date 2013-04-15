@@ -1,7 +1,8 @@
 module Parser where
 
-import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parse, ParseError, optionMaybe, try)
+import Text.Parsec (choice, char, string, alphaNum, sepBy, spaces, many1, parse, ParseError, optionMaybe, try, between, noneOf, digit, oneOf, (<?>), eof )
 import Text.Parsec.String (Parser)
+import Text.Parsec.Expr
 import Control.Applicative
 
 import Type
@@ -26,7 +27,7 @@ select_core = SelectCore <$>
     (optionMaybe (try group_term))
 
 result_column :: Parser ResultColumn
-result_column = ResultColumn <$> (s *> many1 column_character <* s)
+result_column = ResultColumn <$> (s *> many1 column_name_ch <* s)
 
 where_term :: Parser WhereTerm
 where_term = WhereTerm <$> (s *> str "WHERE" *> s *> expr)
@@ -69,31 +70,87 @@ single_source :: Parser SingleSource
 single_source =
   (TableNameSingleSource <$> table_name <*> (optional (str "AS" *> s *> table_alias))) <|>
   (JoinSingleSource <$> join_source)
-    where
-      table_name :: Parser TableName
-      table_name =
-        (TableName Nothing <$> (many1 alphaNum)) <|>
-        (TableName <$> (optionMaybe (s *> (many1 alphaNum) <* s <* str ".")) <*> (many1 alphaNum))
 
 join_constraint :: Parser JoinConstraint
-join_constraint =
-  OnConstraint <$> (s *> (str "ON") *> s *> expr <* s)
+join_constraint = wrap_sp $
+  OnConstraint    <$> ((str "ON") *> s *> expr)
   <|>
-  UsingConstraint <$> (s *> (str "USING") *> s *> (many1 column_name) <* s)
-    where
-      column_name :: Parser ColumnName
-      column_name = ColumnName <$> (s *> many1 column_character <* s)
+  UsingConstraint <$> ((str "USING") *> s *> (many1 $ try column_name))
 
 table_alias :: Parser TableAlias
-table_alias = TableAlias <$> (s *> many1 alphaNum <* s)
+table_alias = wrap_sp $ TableAlias <$> many1 alphaNum
 
+literal_value :: Parser LiteralValue
+literal_value = string_literal
+            <|> null_literal
+            <|> numeric_literal
+
+---------------------------
 expr :: Parser Expr
-expr = Expr <$> (s *> many1 alphaNum <* s)
+expr = wrap_sp ( buildExpressionParser table factor ) <?> "expr"
+
+table = [[prefix "NOT" (UnaryOperatoredExpr NotOp)]
+        ,[binary "*" MultipleOp AssocLeft, binary "/" DivideOp AssocLeft]
+        ,[binary "+" PlusOp AssocLeft,     binary "-" MinusOp AssocLeft]
+        ]
+      where
+        binary  name fun assoc = Infix (do{ str name; return fun }) assoc
+        prefix  name fun       = Prefix (do{ str name; return fun })
+        postfix name fun       = Postfix (do{ str name; return fun })
+
+factor :: Parser Expr
+factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
+
+term :: Parser Expr
+term = (LiteralValue <$> try(literal_value))
+    <|> try(column_name_literal) <?> "term"
+
+---------------------------
+
+numeric_literal :: Parser LiteralValue
+numeric_literal = wrap_sp $ (\num decimal -> NumericLiteral $ (maybe num ((num ++ ".") ++) decimal)) <$> many1 digit <*> optionMaybe (c '.' *> many1 digit)
+
+string_literal :: Parser LiteralValue
+string_literal = wrap_sp $ StringLiteral <$> between (c '"') (c '"') (many inner_char)
+  where
+    inner_char = unescaped <|> escaped
+    unescaped = noneOf "\"\\"
+    escaped = c '\\' >> (oneOf "\"\\")
+
+null_literal :: Parser LiteralValue
+null_literal = do
+    wrap_sp $ try $ str "NULL"
+    return Null
+
+column_name_literal :: Parser Expr
+column_name_literal = wrap_sp $
+    ColumnNameExpr <$> (optionMaybe (try $ DbName     <$> many1 db_name_ch    <* str "."))
+                   <*> (optionMaybe (try $ TableName_ <$> many1 table_name_ch <* str "."))
+                   <*> (ColumnName <$> many1 column_name_ch)
 
 -------------------------------------------------
-column_character :: Parser Char
-column_character = char '*' <|> alphaNum
+column_name :: Parser ColumnName
+column_name = wrap_sp $ ColumnName <$> many1 column_name_ch
+
+table_name :: Parser TableName
+table_name = wrap_sp $ TableName <$> optionMaybe (try $ many1 table_name_ch <* str ".") <*> many1 column_name_ch
+
 -------------------------------------------------
+db_name_ch :: Parser Char
+db_name_ch = oneOf "_" <|> alphaNum
+
+table_name_ch :: Parser Char
+table_name_ch = oneOf "_" <|> alphaNum
+
+column_name_ch :: Parser Char
+column_name_ch = oneOf "_" <|> alphaNum
+
+wrap_sp :: Parser a -> Parser a
+wrap_sp parser = (s *> parser <* s)
+
+-------------------------------------------------
+-- | aliases
+
 s :: Parser ()
 s = spaces
 
