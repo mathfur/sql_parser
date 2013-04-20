@@ -112,10 +112,14 @@ factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
 
 term :: Parser Expr
 term = (LiteralValue <$> try(literal_value))
+    <|> try(function_call)
     <|> try(column_name_literal)
     <?> "term"
 
 ---------------------------
+
+function_call :: Parser Expr
+function_call = FunctionCall <$> many1 function_name_ch <*> (str "(" *> (expr `sepBy` c ',') <* str ")" )
 
 numeric_literal :: Parser LiteralValue
 numeric_literal = wrap_sp $ (\num decimal -> NumericLiteral $ (maybe num ((num ++ ".") ++) decimal)) <$> many1 digit <*> optionMaybe (c '.' *> many1 digit)
@@ -163,6 +167,9 @@ table_name_ch = oneOf "_" <|> alphaNum
 
 column_name_ch :: Parser Char
 column_name_ch = oneOf "_" <|> alphaNum
+
+function_name_ch :: Parser Char
+function_name_ch = oneOf "_" <|> alphaNum
 
 wrap_sp :: Parser a -> Parser a
 wrap_sp parser = (s *> parser <* s)

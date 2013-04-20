@@ -49,6 +49,7 @@ data Expr = LiteralValue LiteralValue
           | NullExpr Expr
           | NotNullExpr Expr
           | InExpr Expr (Maybe UnaryOperator) InnerInExpr
+          | FunctionCall String [Expr]
             deriving (Show, Eq)
 
 data InnerInExpr = InnerInExprs [Expr]

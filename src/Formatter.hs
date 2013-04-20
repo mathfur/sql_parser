@@ -114,6 +114,7 @@ instance Formattable Expr where
     format (InExpr expr (Just not) inner_in_expr) = format expr ++ " NOT IN (" ++ format inner_in_expr ++ ")"
     format (InExpr expr Nothing inner_in_expr) = format expr ++ " IN (" ++ format inner_in_expr ++ ")"
     format (LiteralValue literal_value) = format literal_value
+    format (FunctionCall function_name exprs) = function_name ++ "(" ++ (intercalate ", " $ map format exprs) ++ ")"
 
 instance Formattable InnerInExpr where
     format (InnerInExprs exprs)                   = intercalate ", " $ map format exprs
