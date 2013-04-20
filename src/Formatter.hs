@@ -95,9 +95,9 @@ instance Formattable ColumnName where
 instance Formattable TableAlias where
   format (TableAlias str) = str
 
-instance Formattable TableName where
-  format (TableName (Just db_name) table_name) = db_name ++ "." ++ table_name
-  format (TableName Nothing table_name) = table_name
+instance Formattable DbNameAndTableName where
+  format (DbNameAndTableName (Just db_name) table_name) = format db_name ++ "." ++ format table_name
+  format (DbNameAndTableName Nothing table_name) = format table_name
 
 instance Formattable Expr where
     format (ColumnNameExpr (Just db_name) (Just table_name_) column_name)  = format db_name ++ "." ++ format table_name_ ++ "." ++ format column_name
@@ -121,9 +121,8 @@ instance Formattable Expr where
     format (BetweenExpr expr1 Nothing expr2 expr3)    = format expr1 ++ " BETWEEN "     ++ format expr2 ++ " AND " ++ format expr3
 
 instance Formattable InnerInExpr where
-    format (InnerInExprs exprs)                   = intercalate ", " $ map format exprs
-    format (InnerInTableName (Just db_name) table_name) = format db_name ++ "." ++ format table_name
-    format (InnerInTableName Nothing table_name) = format table_name
+    format (InnerInExprs exprs)                      = intercalate ", " $ map format exprs
+    format (InnerInTableName db_name_and_table_name) = format db_name_and_table_name
 
 instance Formattable LiteralValue where
     format (NumericLiteral str) = str
@@ -133,8 +132,8 @@ instance Formattable LiteralValue where
 instance Formattable UnaryOperator where
     format NotOp = "NOT"
 
-instance Formattable TableName_ where
-  format (TableName_ str) = str
+instance Formattable TableName where
+  format (TableName str) = str
 
 instance Formattable DbName where
   format (DbName str) = str

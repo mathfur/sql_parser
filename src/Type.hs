@@ -24,8 +24,7 @@ data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Sh
 
 data JoinOp = Outer | Inner deriving (Show, Eq) -- OK
 
-data SingleSource = TableNameSingleSource TableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
-  -- TODO: SelectSingleSource SelectStmt (Maybe TableAlias) |
+data SingleSource = TableNameSingleSource DbNameAndTableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
 
 data TableAlias = TableAlias String deriving (Show, Eq)
 
@@ -40,7 +39,7 @@ data JoinConstraint =
 -- | about Expr
 
 data Expr = LiteralValue LiteralValue
-          | ColumnNameExpr (Maybe DbName) (Maybe TableName_) ColumnName
+          | ColumnNameExpr (Maybe DbName) (Maybe TableName) ColumnName
           | UnaryOperatoredExpr UnaryOperator Expr
           | PlusOp Expr Expr
           | MinusOp Expr Expr
@@ -55,7 +54,7 @@ data Expr = LiteralValue LiteralValue
             deriving (Show, Eq)
 
 data InnerInExpr = InnerInExprs [Expr]
-                 | InnerInTableName (Maybe DbName) TableName_
+                 | InnerInTableName DbNameAndTableName
                  deriving (Show, Eq)
 
 data LiteralValue = NumericLiteral String
@@ -65,10 +64,10 @@ data LiteralValue = NumericLiteral String
 
 data UnaryOperator = NotOp deriving (Show, Eq)
 
-data TableName = TableName (Maybe String) String deriving (Show, Eq) -- DatabaseName + TableName
+data DbNameAndTableName = DbNameAndTableName (Maybe DbName) TableName deriving (Show, Eq)
 
 data DbName = DbName String deriving (Show, Eq)
-data TableName_ = TableName_ String deriving (Show, Eq)
+data TableName = TableName String deriving (Show, Eq)
 data ColumnName = ColumnName String deriving (Show, Eq)
 
 {-

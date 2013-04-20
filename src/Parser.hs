@@ -66,9 +66,7 @@ latter_source = LatterSource <$>
         return Inner
 
 single_source :: Parser SingleSource
-single_source =
-  (TableNameSingleSource <$> table_name <*> (optional (str "AS" *> s *> table_alias))) <|>
-  (JoinSingleSource <$> join_source)
+single_source = TableNameSingleSource <$> db_name_and_table_name <*> optional (str "AS" *> s *> table_alias)
 
 join_constraint :: Parser JoinConstraint
 join_constraint = wrap_sp $
@@ -103,7 +101,7 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         postfix pattern fun       = Postfix (do{ pattern; return fun })
         in_expr = Postfix (do
                not <- try(not_op <* s <* str "IN" <* s)
-               in_parenthesis <- (s *> str "(" *> db_name_and_table_name <* str ")" <* s)
+               in_parenthesis <- (s *> str "(" *> inner_in_expr <* str ")" <* s)
                return $ (flip ((flip InExpr) not) in_parenthesis)
                )
         like_expr = Infix (do
@@ -152,24 +150,26 @@ null_literal = do
 column_name_literal :: Parser Expr
 column_name_literal = wrap_sp $
     ColumnNameExpr <$> (optionMaybe (try $ DbName     <$> many1 db_name_ch    <* str "."))
-                   <*> (optionMaybe (try $ TableName_ <$> many1 table_name_ch <* str "."))
+                   <*> (optionMaybe (try $ TableName <$> table_name_str <* str "."))
                    <*> (ColumnName <$> many1 column_name_ch)
 
 -------------------------------------------------
 column_name :: Parser ColumnName
 column_name = wrap_sp $ ColumnName <$> many1 column_name_ch
 
-table_name :: Parser TableName
-table_name = wrap_sp $
-    TableName <$> optionMaybe (try $ many1 table_name_ch <* str ".")
-              <*> many1 column_name_ch
-
-db_name_and_table_name :: Parser InnerInExpr
+db_name_and_table_name :: Parser DbNameAndTableName
 db_name_and_table_name = wrap_sp $
+    DbNameAndTableName <$> optionMaybe (try $ DbName <$> many1 db_name_ch <* str ".")
+                       <*> (try $ TableName <$> table_name_str)
+
+inner_in_expr :: Parser InnerInExpr
+inner_in_expr = wrap_sp $
     InnerInExprs     <$> expr `sepBy` c ','
     <|>
-    InnerInTableName <$> (optionMaybe (try $ DbName <$> many1 db_name_ch    <* str "."))
-                     <*> (TableName_   <$> many1 table_name_ch)
+    InnerInTableName <$> db_name_and_table_name
+
+table_name_str :: Parser String
+table_name_str = try(between (c '`') (c '`') $ many1 table_name_ch) <|> many1 table_name_ch
 
 -------------------------------------------------
 db_name_ch :: Parser Char
