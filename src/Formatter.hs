@@ -42,6 +42,8 @@ instance Formattable LimitTerm where
   format (LimitTerm expr (Just offset)) = "LIMIT " ++ format expr ++ "," ++ format offset
 
 instance Formattable SelectCore where
+    format (UnionAllOp select_core1 select_core2) = format select_core1 ++ " UNION ALL " ++ format select_core2
+    format (UnionOp    select_core1 select_core2) = format select_core1 ++ " UNION "     ++ format select_core2
     format (SelectCore columns join_source where_term group_term) = joinBySp $ [
         "SELECT",
         intercalate "," $ map format columns,

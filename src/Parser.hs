@@ -17,14 +17,19 @@ limit_term :: Parser LimitTerm
 limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> str "," *> expr)
 
 select_core :: Parser SelectCore
-select_core = SelectCore <$>
-    (s *> str "SELECT" *> s *> (try(result_column) `sepBy` (c ',')) <* s <* str "FROM" <* s)
-    <*>
-    join_source
-    <*>
-    (optionMaybe (try where_term))
-    <*>
-    (optionMaybe (try group_term))
+select_core = buildExpressionParser table_select_core term_select_core
+
+table_select_core = [[binary (try $ str "UNION" <* s <* str "ALL") UnionAllOp AssocLeft]
+                    ,[binary (try $ str "UNION") UnionOp AssocLeft]
+                    ]
+                      where
+                        binary pattern func assoc = Infix (do { pattern; return func }) assoc
+
+term_select_core = wrap_sp $
+    try(SelectCore <$> (str "SELECT" *> (try(result_column) `sepBy` (c ',')) <* str "FROM")
+                   <*> join_source
+                   <*> (optionMaybe (try where_term))
+                   <*> (optionMaybe (try group_term)))
 
 result_column :: Parser ResultColumn
 result_column = wrap_sp $

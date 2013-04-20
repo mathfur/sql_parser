@@ -23,6 +23,8 @@ spec :: Spec
 spec = do
     describe "" $ do
         it "" $ assert_of_to_sql_and_format "SELECT * FROM users"
+        it "" $ assert_of_to_sql_and_format "SELECT * FROM users UNION ALL SELECT id FROM users"
+        it "" $ assert_of_to_sql_and_format "SELECT * FROM users UNION SELECT id FROM users"
         it "" $ assert_of_to_sql_and_format "SELECT users.id FROM users"
         it "" $ assert_of_to_sql_and_format "SELECT id,name FROM users"
         it "" $ assert_of_to_sql_and_format "SELECT 1 FROM users"

@@ -10,7 +10,10 @@ data Order = Asc | Desc deriving (Show, Eq)
 
 data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
 
-data SelectCore = SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm) deriving (Show, Eq)
+data SelectCore = UnionAllOp SelectCore SelectCore
+                | UnionOp SelectCore SelectCore
+                | SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm)
+                deriving (Show, Eq)
 
 data ResultColumn = ResultColumn (Maybe TableName)
                   | ResultColumnExpr Expr (Maybe ColumnAlias)
@@ -24,7 +27,7 @@ data GroupTerm = GroupTerm [Expr] (Maybe Expr) deriving (Show, Eq)
 
 data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Show, Eq)
 
-data JoinOp = Outer | Inner deriving (Show, Eq) -- OK
+data JoinOp = Outer | Inner deriving (Show, Eq)
 
 data SingleSource = TableNameSingleSource DbNameAndTableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
 
@@ -106,7 +109,6 @@ InsertStmt
 PragmaStmt
 PragmaValue
 ReindexStmt
-CompoundOperator
 UpdateStmt
 UpdateStmtLimited
 QualifiedTableName
