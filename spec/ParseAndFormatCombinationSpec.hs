@@ -34,6 +34,8 @@ spec = do
         it "" $ to_sql_and_format "SELECT id FROM users WHERE flag IS NULL"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE flag IS NOT NULL"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE NOT flag IS NOT NULL"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE in IN (1, 2, 3)"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE in IN ((1 + 2), (2 + 3) * 4, 3)"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE (123 + 456)"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE users.age * 3"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE (1 + users.age * 3)"

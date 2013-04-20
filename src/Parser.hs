@@ -89,9 +89,10 @@ literal_value = string_literal
 expr :: Parser Expr
 expr = wrap_sp ( buildExpressionParser table factor ) <?> "expr"
 
-table = [[prefix (str "NOT") (UnaryOperatoredExpr NotOp)]
+table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         ,[postfix (try $ str "IS" <* s <* str "NOT" <* s <* str "NULL") NotNullExpr]
         ,[postfix (try $ str "IS" <* s <* str "NULL") NullExpr]
+        ,[in_expr]
         ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft]
         ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft]
         ]
@@ -99,6 +100,10 @@ table = [[prefix (str "NOT") (UnaryOperatoredExpr NotOp)]
         binary  pattern fun assoc = Infix (do{ pattern; return fun }) assoc
         prefix  pattern fun       = Prefix (do{ pattern; return fun })
         postfix pattern fun       = Postfix (do{ pattern; return fun })
+        in_expr = Postfix (do
+           str "IN" <* s
+           exprs <- (s *> str "(" *> (expr `sepBy` c ',') <* str ")" <* s)
+           return ((flip InExpr) exprs))
 
 factor :: Parser Expr
 factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
