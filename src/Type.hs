@@ -12,7 +12,9 @@ data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
 
 data SelectCore = SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm) deriving (Show, Eq)
 
-data ResultColumn = ResultColumn String deriving (Show, Eq)
+data ResultColumn = ResultColumn (Maybe TableName)
+                  | ResultColumnExpr Expr (Maybe ColumnAlias)
+                  deriving (Show, Eq)
 
 data JoinSource = JoinSource SingleSource [LatterSource] deriving (Show, Eq)
 
@@ -27,6 +29,7 @@ data JoinOp = Outer | Inner deriving (Show, Eq) -- OK
 data SingleSource = TableNameSingleSource DbNameAndTableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
 
 data TableAlias = TableAlias String deriving (Show, Eq)
+data ColumnAlias = ColumnAlias String deriving (Show, Eq)
 
 
 data JoinConstraint =

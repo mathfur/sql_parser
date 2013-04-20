@@ -18,7 +18,7 @@ limit_term = LimitTerm <$> (s *> str "LIMIT" *> s *> expr) <*> optionMaybe (s*> 
 
 select_core :: Parser SelectCore
 select_core = SelectCore <$>
-    (s *> str "SELECT" *> s *> (result_column `sepBy` (c ',')) <* s <* str "FROM" <* s)
+    (s *> str "SELECT" *> s *> (try(result_column) `sepBy` (c ',')) <* s <* str "FROM" <* s)
     <*>
     join_source
     <*>
@@ -27,7 +27,15 @@ select_core = SelectCore <$>
     (optionMaybe (try group_term))
 
 result_column :: Parser ResultColumn
-result_column = ResultColumn <$> (s *> many1 column_name_ch <* s)
+result_column = wrap_sp $
+             (try $ (\_ -> ResultColumn Nothing) <$> str "*")
+             <|>
+             (try $ (ResultColumn . Just) <$> (TableName <$> table_name_str <* str ".*"))
+             <|>
+             (try $ ResultColumnExpr <$> expr <*> optionMaybe(try $ s *> str "AS" *> s *> column_alias))
+
+column_alias :: Parser ColumnAlias
+column_alias = ColumnAlias <$> many1 column_alias_ch
 
 where_term :: Parser WhereTerm
 where_term = WhereTerm <$> (s *> str "WHERE" *> s *> expr)
@@ -186,6 +194,9 @@ function_name_ch = oneOf "_" <|> alphaNum
 
 table_alias_ch :: Parser Char
 table_alias_ch = oneOf "_" <|> alphaNum
+
+column_alias_ch :: Parser Char
+column_alias_ch = oneOf "_" <|> alphaNum
 
 wrap_sp :: Parser a -> Parser a
 wrap_sp parser = (s *> parser <* s)

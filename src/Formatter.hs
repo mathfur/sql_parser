@@ -42,37 +42,43 @@ instance Formattable LimitTerm where
   format (LimitTerm expr (Just offset)) = "LIMIT " ++ format expr ++ "," ++ format offset
 
 instance Formattable SelectCore where
-  format (SelectCore columns join_source where_term group_term) = joinBySp $ [
-      "SELECT",
-      intercalate "," $ map format columns,
-      "FROM",
-      format join_source
-    ] ++ (addPrefixA "WHERE " $ fmap format where_term)
-      ++ (addPrefixA "GROUP BY " $ fmap format group_term)
+    format (SelectCore columns join_source where_term group_term) = joinBySp $ [
+        "SELECT",
+        intercalate "," $ map format columns,
+        "FROM",
+        format join_source
+      ] ++ (addPrefixA "WHERE " $ fmap format where_term)
+        ++ (addPrefixA "GROUP BY " $ fmap format group_term)
 
 instance Formattable WhereTerm where
-  format (WhereTerm expr) = format expr
+    format (WhereTerm expr) = format expr
 
 instance Formattable GroupTerm where
-  format (GroupTerm exprs expr) = (intercalate "," $ map format exprs) ++ (addPrefix " HAVING " $ fmap format expr)
+    format (GroupTerm exprs expr) = (intercalate "," $ map format exprs) ++ (addPrefix " HAVING " $ fmap format expr)
 
 instance Formattable ResultColumn where
-  format (ResultColumn str) = str
+    format (ResultColumn (Just table_name)) = format table_name ++ ".*"
+    format (ResultColumn Nothing) = "*"
+    format (ResultColumnExpr expr (Just table_alias)) = format expr ++ " AS " ++ format table_alias
+    format (ResultColumnExpr expr Nothing) = format expr
+
+instance Formattable ColumnAlias where
+    format (ColumnAlias table_alias) = table_alias
 
 instance Formattable JoinSource where
-  format (JoinSource single_source latter_sources) = format single_source ++ spacer ++ latter_string
-    where
-      latter_string = intercalate " " $ map format latter_sources
-      spacer = if (length latter_string == 0) then "" else " "
+    format (JoinSource single_source latter_sources) = format single_source ++ spacer ++ latter_string
+      where
+        latter_string = intercalate " " $ map format latter_sources
+        spacer = if (length latter_string == 0) then "" else " "
 
 instance Formattable SingleSource where
-  format (JoinSingleSource join_source) = format join_source
-  format (TableNameSingleSource table_name Nothing) = format table_name
-  format (TableNameSingleSource table_name (Just alias_name)) = joinBySp [
-      format table_name,
-      "AS",
-      format alias_name
-    ]
+    format (JoinSingleSource join_source) = format join_source
+    format (TableNameSingleSource table_name Nothing) = format table_name
+    format (TableNameSingleSource table_name (Just alias_name)) = joinBySp [
+        format table_name,
+        "AS",
+        format alias_name
+      ]
 
 instance Formattable LatterSource where
   format (LatterSource op single_source join_constraint) = joinBySp [
