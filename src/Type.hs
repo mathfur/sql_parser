@@ -51,6 +51,7 @@ data Expr = LiteralValue LiteralValue
           | InExpr Expr (Maybe UnaryOperator) InnerInExpr
           | FunctionCall String [Expr]
           | LikeExpr (Maybe UnaryOperator) Expr Expr
+          | BetweenExpr Expr (Maybe UnaryOperator) Expr Expr
             deriving (Show, Eq)
 
 data InnerInExpr = InnerInExprs [Expr]

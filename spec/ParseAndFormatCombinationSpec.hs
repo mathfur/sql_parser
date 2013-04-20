@@ -45,6 +45,8 @@ spec = do
         it "" $ to_sql_and_format "SELECT id FROM users WHERE 1 NOT LIKE 2"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE name LIKE \"%Suzuki\""
         it "" $ to_sql_and_format "SELECT id FROM users WHERE name NOT LIKE \"%Suzuki\""
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE age BETWEEN 10 AND 20"
+        it "" $ to_sql_and_format "SELECT id FROM users WHERE age NOT BETWEEN 10 AND 20"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE (users.age + users.age)"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE \"foo\" * db_foo.users.age"
         it "" $ to_sql_and_format "SELECT id FROM users WHERE \"foo\""

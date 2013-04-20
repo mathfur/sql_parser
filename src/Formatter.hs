@@ -117,6 +117,8 @@ instance Formattable Expr where
     format (FunctionCall function_name exprs) = function_name ++ "(" ++ (intercalate ", " $ map format exprs) ++ ")"
     format (LikeExpr (Just not) expr1 expr2) = format expr1 ++ " NOT LIKE " ++ format expr2
     format (LikeExpr Nothing expr1 expr2) = format expr1 ++ " LIKE " ++ format expr2
+    format (BetweenExpr expr1 (Just not) expr2 expr3) = format expr1 ++ " NOT BETWEEN " ++ format expr2 ++ " AND " ++ format expr3
+    format (BetweenExpr expr1 Nothing expr2 expr3)    = format expr1 ++ " BETWEEN "     ++ format expr2 ++ " AND " ++ format expr3
 
 instance Formattable InnerInExpr where
     format (InnerInExprs exprs)                   = intercalate ", " $ map format exprs
