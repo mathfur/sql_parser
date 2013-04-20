@@ -111,8 +111,14 @@ instance Formattable Expr where
     format (DivideOp expr1 expr2) = format expr1 ++ " / " ++ format expr2
     format (NullExpr expr) = format expr ++ " IS NULL"
     format (NotNullExpr expr) = format expr ++ " IS NOT NULL"
-    format (InExpr expr exprs) = format expr ++ " IN (" ++ (intercalate ", " $ map format exprs) ++ ")"
+    format (InExpr expr (Just not) inner_in_expr) = format expr ++ " NOT IN (" ++ format inner_in_expr ++ ")"
+    format (InExpr expr Nothing inner_in_expr) = format expr ++ " IN (" ++ format inner_in_expr ++ ")"
     format (LiteralValue literal_value) = format literal_value
+
+instance Formattable InnerInExpr where
+    format (InnerInExprs exprs)                   = intercalate ", " $ map format exprs
+    format (InnerInTableName (Just db_name) table_name) = format db_name ++ "." ++ format table_name
+    format (InnerInTableName Nothing table_name) = format table_name
 
 instance Formattable LiteralValue where
     format (NumericLiteral str) = str

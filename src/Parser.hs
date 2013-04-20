@@ -101,9 +101,11 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         prefix  pattern fun       = Prefix (do{ pattern; return fun })
         postfix pattern fun       = Postfix (do{ pattern; return fun })
         in_expr = Postfix (do
-           str "IN" <* s
-           exprs <- (s *> str "(" *> (expr `sepBy` c ',') <* str ")" <* s)
-           return ((flip InExpr) exprs))
+               not <- optionMaybe(try $ str "NOT")
+               s *> str "IN" <* s
+               in_parenthesis <- (s *> str "(" *> db_name_and_table_name <* str ")" <* s)
+               return $ (flip ((flip InExpr) (fmap (\v -> NotOp) not)) in_parenthesis)
+               )
 
 factor :: Parser Expr
 factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
@@ -141,7 +143,16 @@ column_name :: Parser ColumnName
 column_name = wrap_sp $ ColumnName <$> many1 column_name_ch
 
 table_name :: Parser TableName
-table_name = wrap_sp $ TableName <$> optionMaybe (try $ many1 table_name_ch <* str ".") <*> many1 column_name_ch
+table_name = wrap_sp $
+    TableName <$> optionMaybe (try $ many1 table_name_ch <* str ".")
+              <*> many1 column_name_ch
+
+db_name_and_table_name :: Parser InnerInExpr
+db_name_and_table_name = wrap_sp $
+    InnerInExprs     <$> expr `sepBy` c ','
+    <|>
+    InnerInTableName <$> (optionMaybe (try $ DbName <$> many1 db_name_ch    <* str "."))
+                     <*> (TableName_   <$> many1 table_name_ch)
 
 -------------------------------------------------
 db_name_ch :: Parser Char

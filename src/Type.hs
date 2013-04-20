@@ -48,8 +48,13 @@ data Expr = LiteralValue LiteralValue
           | DivideOp Expr Expr
           | NullExpr Expr
           | NotNullExpr Expr
-          | InExpr Expr [Expr]
+          | InExpr Expr (Maybe UnaryOperator) InnerInExpr
             deriving (Show, Eq)
+
+data InnerInExpr = InnerInExprs [Expr]
+                 | InnerInTableName (Maybe DbName) TableName_
+                 deriving (Show, Eq)
+
 
 data LiteralValue = NumericLiteral String
                  | StringLiteral String
