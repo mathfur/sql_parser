@@ -47,7 +47,6 @@ order = do
 
 join_source :: Parser JoinSource
 join_source = JoinSource <$> single_source <*> (many (try latter_source))
-  -- old: (s *> many1 alphaNum <* s)
 
 latter_source :: Parser LatterSource
 latter_source = LatterSource <$>
@@ -78,7 +77,7 @@ join_constraint = wrap_sp $
   UsingConstraint <$> ((str "USING") *> s *> (many1 $ try column_name))
 
 table_alias :: Parser TableAlias
-table_alias = wrap_sp $ TableAlias <$> many1 alphaNum
+table_alias = wrap_sp $ TableAlias <$> many1 table_alias_ch
 
 literal_value :: Parser LiteralValue
 literal_value = string_literal
@@ -93,6 +92,7 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         ,[postfix (try $ str "IS" <* s <* str "NOT" <* s <* str "NULL") NotNullExpr]
         ,[postfix (try $ str "IS" <* s <* str "NULL") NullExpr]
         ,[in_expr]
+        ,[like_expr]
         ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft]
         ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft]
         ]
@@ -101,14 +101,20 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         prefix  pattern fun       = Prefix (do{ pattern; return fun })
         postfix pattern fun       = Postfix (do{ pattern; return fun })
         in_expr = Postfix (do
-               not <- optionMaybe(try $ str "NOT")
-               s *> str "IN" <* s
+               not <- try(not_op <* s <* str "IN" <* s)
                in_parenthesis <- (s *> str "(" *> db_name_and_table_name <* str ")" <* s)
-               return $ (flip ((flip InExpr) (fmap (\v -> NotOp) not)) in_parenthesis)
+               return $ (flip ((flip InExpr) not) in_parenthesis)
                )
+        like_expr = Infix (do
+                     not <- try(not_op <* s <* str "LIKE" <* s)
+                     return (LikeExpr not)
+                     ) AssocLeft
 
 factor :: Parser Expr
 factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
+
+not_op :: Parser (Maybe UnaryOperator)
+not_op = wrap_sp $ fmap (\_ -> NotOp) <$> optionMaybe(try $ str "NOT")
 
 term :: Parser Expr
 term = (LiteralValue <$> try(literal_value))
@@ -170,6 +176,9 @@ column_name_ch = oneOf "_" <|> alphaNum
 
 function_name_ch :: Parser Char
 function_name_ch = oneOf "_" <|> alphaNum
+
+table_alias_ch :: Parser Char
+table_alias_ch = oneOf "_" <|> alphaNum
 
 wrap_sp :: Parser a -> Parser a
 wrap_sp parser = (s *> parser <* s)

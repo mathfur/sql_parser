@@ -50,12 +50,12 @@ data Expr = LiteralValue LiteralValue
           | NotNullExpr Expr
           | InExpr Expr (Maybe UnaryOperator) InnerInExpr
           | FunctionCall String [Expr]
+          | LikeExpr (Maybe UnaryOperator) Expr Expr
             deriving (Show, Eq)
 
 data InnerInExpr = InnerInExprs [Expr]
                  | InnerInTableName (Maybe DbName) TableName_
                  deriving (Show, Eq)
-
 
 data LiteralValue = NumericLiteral String
                  | StringLiteral String
