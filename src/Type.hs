@@ -46,6 +46,8 @@ data Expr = LiteralValue LiteralValue
           | MinusOp Expr Expr
           | MultipleOp Expr Expr
           | DivideOp Expr Expr
+          | NullExpr Expr
+          | NotNullExpr Expr
             deriving (Show, Eq)
 
 data LiteralValue = NumericLiteral String

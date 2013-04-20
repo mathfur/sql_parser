@@ -109,6 +109,8 @@ instance Formattable Expr where
     format (MinusOp expr1 expr2) = "(" ++ format expr1 ++ " - " ++ format expr2 ++ ")"
     format (MultipleOp expr1 expr2) = format expr1 ++ " * " ++ format expr2
     format (DivideOp expr1 expr2) = format expr1 ++ " / " ++ format expr2
+    format (NullExpr expr) = format expr ++ " IS NULL"
+    format (NotNullExpr expr) = format expr ++ " IS NOT NULL"
     format (LiteralValue literal_value) = format literal_value
 
 instance Formattable LiteralValue where

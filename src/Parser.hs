@@ -89,21 +89,24 @@ literal_value = string_literal
 expr :: Parser Expr
 expr = wrap_sp ( buildExpressionParser table factor ) <?> "expr"
 
-table = [[prefix "NOT" (UnaryOperatoredExpr NotOp)]
-        ,[binary "*" MultipleOp AssocLeft, binary "/" DivideOp AssocLeft]
-        ,[binary "+" PlusOp AssocLeft,     binary "-" MinusOp AssocLeft]
+table = [[prefix (str "NOT") (UnaryOperatoredExpr NotOp)]
+        ,[postfix (try $ str "IS" <* s <* str "NOT" <* s <* str "NULL") NotNullExpr]
+        ,[postfix (try $ str "IS" <* s <* str "NULL") NullExpr]
+        ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft]
+        ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft]
         ]
       where
-        binary  name fun assoc = Infix (do{ str name; return fun }) assoc
-        prefix  name fun       = Prefix (do{ str name; return fun })
-        postfix name fun       = Postfix (do{ str name; return fun })
+        binary  pattern fun assoc = Infix (do{ pattern; return fun }) assoc
+        prefix  pattern fun       = Prefix (do{ pattern; return fun })
+        postfix pattern fun       = Postfix (do{ pattern; return fun })
 
 factor :: Parser Expr
 factor = (try $ s *> str "(" *> expr <* str ")" <* s) <|> term <?> "factor"
 
 term :: Parser Expr
 term = (LiteralValue <$> try(literal_value))
-    <|> try(column_name_literal) <?> "term"
+    <|> try(column_name_literal)
+    <?> "term"
 
 ---------------------------
 
