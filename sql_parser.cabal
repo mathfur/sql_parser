@@ -43,7 +43,7 @@ cabal-version:       >= 1.14
 executable sql_parser
   main-is: Main.hs
   hs-source-dirs: src
-  build-depends: base ==4.5.*, hspec >= 1.3, parsec ==3.1.3.*, QuickCheck ==2.6.*
+  build-depends: base ==4.5.*, hspec >= 1.3, parsec ==3.1.3.*, QuickCheck ==2.6.*, syb ==0.3.6.1
   ghc-options: -Wall
   default-language:    Haskell2010
 
@@ -52,5 +52,5 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs: src, spec
   ghc-options: -Wall
-  build-depends: base, hspec >= 1.3, parsec == 3.1.3.*, QuickCheck ==2.6.*
+  build-depends: base, hspec >= 1.3, parsec == 3.1.3.*, QuickCheck ==2.6.*, syb ==0.3.6.1
   default-language: Haskell2010

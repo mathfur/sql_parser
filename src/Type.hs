@@ -1,44 +1,47 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Type where
 
-data SQL = SQL [SelectStmt] deriving (Show, Eq)
+import Data.Data
 
-data SelectStmt = SelectStmt SelectCore [OrderingTerm] (Maybe LimitTerm) deriving (Show, Eq)
+data SQL = SQL [SelectStmt] deriving (Data, Typeable, Show, Eq)
 
-data OrderingTerm = OrderingTerm Expr Order deriving (Show, Eq)
+data SelectStmt = SelectStmt SelectCore [OrderingTerm] (Maybe LimitTerm) deriving (Data, Typeable, Show, Eq)
 
-data Order = Asc | Desc deriving (Show, Eq)
+data OrderingTerm = OrderingTerm Expr Order deriving (Data, Typeable, Show, Eq)
 
-data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Show, Eq)
+data Order = Asc | Desc deriving (Data, Typeable, Show, Eq)
+
+data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Data, Typeable, Show, Eq)
 
 data SelectCore = UnionAllOp SelectCore SelectCore
                 | UnionOp SelectCore SelectCore
                 | SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm)
-                deriving (Show, Eq)
+                deriving (Data, Typeable, Show, Eq)
 
 data ResultColumn = ResultColumn (Maybe TableName)
                   | ResultColumnExpr Expr (Maybe ColumnAlias)
-                  deriving (Show, Eq)
+                  deriving (Data, Typeable, Show, Eq)
 
-data JoinSource = JoinSource SingleSource [LatterSource] deriving (Show, Eq)
+data JoinSource = JoinSource SingleSource [LatterSource] deriving (Data, Typeable, Show, Eq)
 
-data WhereTerm = WhereTerm Expr deriving (Show, Eq)
+data WhereTerm = WhereTerm Expr deriving (Data, Typeable, Show, Eq)
 
-data GroupTerm = GroupTerm [Expr] (Maybe Expr) deriving (Show, Eq)
+data GroupTerm = GroupTerm [Expr] (Maybe Expr) deriving (Data, Typeable, Show, Eq)
 
-data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Show, Eq)
+data LatterSource = LatterSource JoinOp SingleSource JoinConstraint deriving (Data, Typeable, Show, Eq)
 
-data JoinOp = Outer | Inner deriving (Show, Eq)
+data JoinOp = Outer | Inner deriving (Data, Typeable, Show, Eq)
 
-data SingleSource = TableNameSingleSource DbNameAndTableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Show, Eq)
+data SingleSource = TableNameSingleSource DbNameAndTableName (Maybe TableAlias) | JoinSingleSource JoinSource deriving (Data, Typeable, Show, Eq)
 
-data TableAlias = TableAlias String deriving (Show, Eq)
-data ColumnAlias = ColumnAlias String deriving (Show, Eq)
-
+data TableAlias = TableAlias String deriving (Data, Typeable, Show, Eq)
+data ColumnAlias = ColumnAlias String deriving (Data, Typeable, Show, Eq)
 
 data JoinConstraint =
   OnConstraint Expr |
   UsingConstraint [ColumnName]
-    deriving (Show, Eq)
+    deriving (Data, Typeable, Show, Eq)
 
 
 --------------------------------------------------
@@ -57,24 +60,24 @@ data Expr = LiteralValue LiteralValue
           | FunctionCall String [Expr]
           | LikeExpr (Maybe UnaryOperator) Expr Expr
           | BetweenExpr Expr (Maybe UnaryOperator) Expr Expr
-            deriving (Show, Eq)
+            deriving (Data, Typeable, Show, Eq)
 
 data InnerInExpr = InnerInExprs [Expr]
                  | InnerInTableName DbNameAndTableName
-                 deriving (Show, Eq)
+                 deriving (Data, Typeable, Show, Eq)
 
 data LiteralValue = NumericLiteral String
                  | StringLiteral String
                  | Null
-                 deriving (Show, Eq)
+                 deriving (Data, Typeable, Show, Eq)
 
-data UnaryOperator = NotOp deriving (Show, Eq)
+data UnaryOperator = NotOp deriving (Data, Typeable, Show, Eq)
 
-data DbNameAndTableName = DbNameAndTableName (Maybe DbName) TableName deriving (Show, Eq)
+data DbNameAndTableName = DbNameAndTableName (Maybe DbName) TableName deriving (Data, Typeable, Show, Eq)
 
-data DbName = DbName String deriving (Show, Eq)
-data TableName = TableName String deriving (Show, Eq)
-data ColumnName = ColumnName String deriving (Show, Eq)
+data DbName = DbName String deriving (Data, Typeable, Show, Eq)
+data TableName = TableName String deriving (Data, Typeable, Show, Eq)
+data ColumnName = ColumnName String deriving (Data, Typeable, Show, Eq)
 
 {-
 AnalyzeStmt

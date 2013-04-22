@@ -5,12 +5,12 @@ module ParseAndFormatCombinationSpec where
 import Test.Hspec
 import Test.Hspec.QuickCheck ()
 import Test.QuickCheck()
+import Text.Parsec (ParseError)
 
 import Parser
 import Formatter
 import Type
-
-import Text.Parsec (ParseError)
+import ProcessSql
 
 prop_format_to_sql :: String -> Bool
 prop_format_to_sql sql_string = (sql_string == Formatter.format (getRightValue (Parser.to_sql sql_string)))
@@ -21,7 +21,7 @@ getRightValue (Left _) = SQL []
 
 spec :: Spec
 spec = do
-    describe "" $ do
+    describe "Main parse functionality" $ do
         it "" $ assert_of_to_sql_and_format "SELECT * FROM users"
         it "" $ assert_of_to_sql_and_format "SELECT * FROM users UNION ALL SELECT id FROM users"
         it "" $ assert_of_to_sql_and_format "SELECT * FROM users UNION SELECT id FROM users"
@@ -66,6 +66,9 @@ spec = do
         it "" $ assert_of_to_sql_and_format "SELECT id,name FROM users; SELECT id FROM groups"
         it "" $ (to_sql_and_format "SELECT id FROM `users`") `shouldBe` "SELECT id FROM users"
         it "" $ (to_sql_and_format "SELECT id FROM db_name.`users`") `shouldBe` "SELECT id FROM db_name.users"
-          where
-            assert_of_to_sql_and_format query = (to_sql_and_format query) `shouldBe` query
-            to_sql_and_format  = Formatter.format . getRightValue . Parser.to_sql
+    describe "" $ do
+        it "" $ (get_all_tables_from_sql "SELECT * FROM users OUTER JOIN companies ON 1") `shouldBe` ["users", "companies"]
+            where
+                assert_of_to_sql_and_format query = (to_sql_and_format query) `shouldBe` query
+                to_sql_and_format  = Formatter.format . getRightValue . Parser.to_sql
+                get_all_tables_from_sql = get_all_tables . getRightValue . Parser.to_sql
