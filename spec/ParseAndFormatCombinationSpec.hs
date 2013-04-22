@@ -65,6 +65,7 @@ spec = do
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users GROUP BY 1 HAVING 3"
         it "" $ assert_of_to_sql_and_format "SELECT id,name FROM users; SELECT id FROM groups"
         it "" $ (to_sql_and_format "SELECT id FROM `users`") `shouldBe` "SELECT id FROM users"
+        it "" $ (to_sql_and_format "SELECT `users`.`id` FROM `users`") `shouldBe` "SELECT users.id FROM users"
         it "" $ (to_sql_and_format "SELECT id FROM db_name.`users`") `shouldBe` "SELECT id FROM db_name.users"
     describe "" $ do
         it "" $ (get_all_tables_from_sql "SELECT * FROM users OUTER JOIN companies ON 1") `shouldBe` ["users", "companies"]

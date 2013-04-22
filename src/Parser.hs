@@ -164,11 +164,11 @@ column_name_literal :: Parser Expr
 column_name_literal = wrap_sp $
     ColumnNameExpr <$> (optionMaybe (try $ DbName     <$> many1 db_name_ch    <* str "."))
                    <*> (optionMaybe (try $ TableName <$> table_name_str <* str "."))
-                   <*> (ColumnName <$> many1 column_name_ch)
+                   <*> (ColumnName <$> column_name_str)
 
 -------------------------------------------------
 column_name :: Parser ColumnName
-column_name = wrap_sp $ ColumnName <$> many1 column_name_ch
+column_name = wrap_sp $ ColumnName <$> column_name_str
 
 db_name_and_table_name :: Parser DbNameAndTableName
 db_name_and_table_name = wrap_sp $
@@ -183,6 +183,9 @@ inner_in_expr = wrap_sp $
 
 table_name_str :: Parser String
 table_name_str = try(between (c '`') (c '`') $ many1 table_name_ch) <|> many1 table_name_ch
+
+column_name_str :: Parser String
+column_name_str = try(between (c '`') (c '`') $ many1 column_name_ch) <|> many1 column_name_ch
 
 -------------------------------------------------
 db_name_ch :: Parser Char
