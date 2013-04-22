@@ -54,6 +54,8 @@ spec = do
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE name LIKE \"%Suzuki\""
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE name NOT LIKE \"%Suzuki\""
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE age BETWEEN 10 AND 20"
+        it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE True AND False"
+        it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE (True OR False)"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE age NOT BETWEEN 10 AND 20"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE (users.age + users.age)"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE \"foo\" * db_foo.users.age"

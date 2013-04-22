@@ -115,8 +115,10 @@ instance Formattable Expr where
     format (UnaryOperatoredExpr unary_operator expr) = format unary_operator ++ " " ++ format expr
     format (PlusOp expr1 expr2) = "(" ++ format expr1 ++ " + " ++ format expr2 ++ ")"
     format (MinusOp expr1 expr2) = "(" ++ format expr1 ++ " - " ++ format expr2 ++ ")"
+    format (OrOp expr1 expr2) = "(" ++ format expr1 ++ " OR " ++ format expr2 ++ ")"
     format (MultipleOp expr1 expr2) = format expr1 ++ " * " ++ format expr2
     format (DivideOp expr1 expr2) = format expr1 ++ " / " ++ format expr2
+    format (AndOp expr1 expr2) = format expr1 ++ " AND " ++ format expr2
     format (EqualExpr expr1 expr2) = format expr1 ++ " = " ++ format expr2
     format (NullExpr expr) = format expr ++ " IS NULL"
     format (NotNullExpr expr) = format expr ++ " IS NOT NULL"
@@ -126,8 +128,8 @@ instance Formattable Expr where
     format (FunctionCall function_name exprs) = function_name ++ "(" ++ (intercalate ", " $ map format exprs) ++ ")"
     format (LikeExpr (Just not) expr1 expr2) = format expr1 ++ " NOT LIKE " ++ format expr2
     format (LikeExpr Nothing expr1 expr2) = format expr1 ++ " LIKE " ++ format expr2
-    format (BetweenExpr expr1 (Just not) expr2 expr3) = format expr1 ++ " NOT BETWEEN " ++ format expr2 ++ " AND " ++ format expr3
-    format (BetweenExpr expr1 Nothing expr2 expr3)    = format expr1 ++ " BETWEEN "     ++ format expr2 ++ " AND " ++ format expr3
+    format (BetweenExpr expr1 (Just not) expr2) = format expr1 ++ " NOT BETWEEN " ++ format expr2
+    format (BetweenExpr expr1 Nothing expr2)    = format expr1 ++ " BETWEEN "     ++ format expr2
 
 instance Formattable InnerInExpr where
     format (InnerInExprs exprs)                      = intercalate ", " $ map format exprs

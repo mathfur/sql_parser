@@ -105,8 +105,8 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         ,[in_expr]
         ,[like_expr]
         ,[between_expr]
-        ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft]
-        ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft]
+        ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft, binary (try $ str "AND") AndOp AssocLeft]
+        ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft,  binary (try $ str "OR") OrOp AssocLeft]
         ,[binary (str "=") EqualExpr AssocLeft]
         ]
       where
@@ -124,9 +124,8 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
                      ) AssocLeft
         between_expr = Postfix (do
                                not <- try(not_op <* s <* str "BETWEEN" <* s)
-                               expr1 <- expr <* s <* str "AND" <* s
-                               expr2 <- expr <* s
-                               return $ flip (flip (flip BetweenExpr not) expr1) expr2
+                               expr <- expr <* s
+                               return $ flip (flip BetweenExpr not) expr
                                )
 
 factor :: Parser Expr
