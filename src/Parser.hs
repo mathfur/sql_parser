@@ -107,6 +107,7 @@ table = [[prefix (try $ str "NOT") (UnaryOperatoredExpr NotOp)]
         ,[between_expr]
         ,[binary (str "*") MultipleOp AssocLeft, binary (str "/") DivideOp AssocLeft]
         ,[binary (str "+") PlusOp AssocLeft,     binary (str "-") MinusOp AssocLeft]
+        ,[binary (str "=") EqualExpr AssocLeft]
         ]
       where
         binary  pattern fun assoc = Infix (do{ pattern; return fun }) assoc

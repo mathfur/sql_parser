@@ -56,6 +56,7 @@ data Expr = LiteralValue LiteralValue
           | DivideOp Expr Expr
           | NullExpr Expr
           | NotNullExpr Expr
+          | EqualExpr Expr Expr
           | InExpr Expr (Maybe UnaryOperator) InnerInExpr
           | FunctionCall String [Expr]
           | LikeExpr (Maybe UnaryOperator) Expr Expr

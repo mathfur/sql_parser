@@ -117,6 +117,7 @@ instance Formattable Expr where
     format (MinusOp expr1 expr2) = "(" ++ format expr1 ++ " - " ++ format expr2 ++ ")"
     format (MultipleOp expr1 expr2) = format expr1 ++ " * " ++ format expr2
     format (DivideOp expr1 expr2) = format expr1 ++ " / " ++ format expr2
+    format (EqualExpr expr1 expr2) = format expr1 ++ " = " ++ format expr2
     format (NullExpr expr) = format expr ++ " IS NULL"
     format (NotNullExpr expr) = format expr ++ " IS NOT NULL"
     format (InExpr expr (Just not) inner_in_expr) = format expr ++ " NOT IN (" ++ format inner_in_expr ++ ")"
