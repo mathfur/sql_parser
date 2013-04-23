@@ -16,7 +16,7 @@ get_line_and_output = do
         let diff = abs $ (length sql) - (length result)
         let ratio :: Float
             ratio = ((fromIntegral diff) / (fromIntegral $ length sql))*100
-        putStrLn $ "OK(diff:" ++ show diff ++ ", ratio:" ++ printf "%.0f" ratio ++ "): " ++ show sql ++ ": " ++ show result
+        putStrLn $ "OK(diff:" ++ show diff ++ ", ratio:" ++ printf "%.0f" ratio ++ "):\t" ++ show sql ++ "\n\t\t\t" ++ show result
       Left e -> do
         putStrLn $ "NG: " ++ show sql
 
