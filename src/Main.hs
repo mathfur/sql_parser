@@ -5,6 +5,7 @@ import ProcessSql
 import System.IO (getContents)
 import Control.Monad
 import Data.Char (toUpper)
+import Text.Printf (printf)
 
 get_line_and_output :: IO ()
 get_line_and_output = do
@@ -12,7 +13,10 @@ get_line_and_output = do
     case (Parser.to_sql $ map toUpper sql) of
       Right e -> do
         let result = Formatter.format e
-        putStrLn $ "OK(" ++ show (length result) ++ "): " ++ show sql ++ ": " ++ show result
+        let diff = abs $ (length sql) - (length result)
+        let ratio :: Float
+            ratio = ((fromIntegral diff) / (fromIntegral $ length sql))*100
+        putStrLn $ "OK(diff:" ++ show diff ++ ", ratio:" ++ printf "%.0f" ratio ++ "): " ++ show sql ++ ": " ++ show result
       Left e -> do
         putStrLn $ "NG: " ++ show sql
 
