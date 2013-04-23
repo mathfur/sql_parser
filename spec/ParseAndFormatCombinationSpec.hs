@@ -46,7 +46,7 @@ spec = do
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE (123 + 456)"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE CHAR(1, 2, 3)"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE CURRENT_TIME()"
-        it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE users.age * 3"
+        it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE users.age * 3 = 30"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE (1 + users.age * 3)"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE 1 LIKE 2"
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users WHERE (1 + 2) = 3"
@@ -68,6 +68,7 @@ spec = do
         it "" $ assert_of_to_sql_and_format "SELECT id FROM users GROUP BY 1 HAVING 3"
         it "" $ assert_of_to_sql_and_format "SELECT id,name FROM users; SELECT id FROM groups"
         it "" $ (to_sql_and_format "SELECT id FROM `users`") `shouldBe` "SELECT id FROM users"
+        it "" $ (to_sql_and_format "SELECT id FROM `users` WHERE (`users`.`age` = 30)") `shouldBe` "SELECT id FROM users WHERE users.age = 30"
         it "" $ (to_sql_and_format "SELECT `users`.`id` FROM `users`") `shouldBe` "SELECT users.id FROM users"
         it "" $ (to_sql_and_format "SELECT id FROM db_name.`users`") `shouldBe` "SELECT id FROM db_name.users"
     describe "" $ do
