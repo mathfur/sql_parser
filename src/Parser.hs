@@ -185,7 +185,7 @@ table_name_str :: Parser String
 table_name_str = try(between (c '`') (c '`') $ many1 table_name_ch) <|> many1 table_name_ch
 
 column_name_str :: Parser String
-column_name_str = try(between (c '`') (c '`') $ many1 column_name_ch) <|> many1 column_name_ch
+column_name_str = try(between (c '`') (c '`') $ many1 column_name_ch) <|> many1 column_name_ch <|> str "*"
 
 -------------------------------------------------
 db_name_ch :: Parser Char
