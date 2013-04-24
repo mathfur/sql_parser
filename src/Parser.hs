@@ -26,10 +26,18 @@ table_select_core = [[binary (try $ str "UNION" <* s <* str "ALL") UnionAllOp As
                         binary pattern func assoc = Infix (do { pattern; return func }) assoc
 
 term_select_core = wrap_sp $
-    try(SelectCore <$> (str "SELECT" *> (try(result_column) `sepBy` (c ',')) <* str "FROM")
+    try(SelectCore <$> (str "SELECT" *> optionMaybe (try $ select_option))
+                   <*> ((try(result_column) `sepBy` (c ',')) <* str "FROM")
                    <*> join_source
                    <*> (optionMaybe (try where_term))
                    <*> (optionMaybe (try group_term)))
+
+select_option :: Parser SelectOption
+select_option = do
+    result <- wrap_sp (str "DISTINCT" <|> str "ALL")
+    case result of
+      "DISTINCT" -> return SelectDistinct
+      "ALL"  -> return SelectAll
 
 result_column :: Parser ResultColumn
 result_column = wrap_sp $

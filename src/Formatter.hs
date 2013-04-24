@@ -44,13 +44,18 @@ instance Formattable LimitTerm where
 instance Formattable SelectCore where
     format (UnionAllOp select_core1 select_core2) = format select_core1 ++ " UNION ALL " ++ format select_core2
     format (UnionOp    select_core1 select_core2) = format select_core1 ++ " UNION "     ++ format select_core2
-    format (SelectCore columns join_source where_term group_term) = joinBySp $ [
-        "SELECT",
+    format (SelectCore select_option columns join_source where_term group_term) = joinBySp $ [
+        from_option select_option,
         intercalate "," $ map format columns,
         "FROM",
         format join_source
       ] ++ (addPrefixA "WHERE " $ fmap format where_term)
         ++ (addPrefixA "GROUP BY " $ fmap format group_term)
+       where
+         from_option opt = case opt of
+             Just SelectDistinct -> "SELECT DISTINCT"
+             Just SelectAll      -> "SELECT ALL"
+             Nothing             -> "SELECT"
 
 instance Formattable WhereTerm where
     format (WhereTerm expr) = format expr

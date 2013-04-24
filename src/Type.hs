@@ -16,8 +16,10 @@ data LimitTerm = LimitTerm Expr (Maybe Expr) deriving (Data, Typeable, Show, Eq)
 
 data SelectCore = UnionAllOp SelectCore SelectCore
                 | UnionOp SelectCore SelectCore
-                | SelectCore [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm)
+                | SelectCore (Maybe SelectOption) [ResultColumn] JoinSource (Maybe WhereTerm) (Maybe GroupTerm)
                 deriving (Data, Typeable, Show, Eq)
+
+data SelectOption = SelectDistinct | SelectAll deriving (Data, Typeable, Show, Eq)
 
 data ResultColumn = ResultColumn (Maybe TableName)
                   | ResultColumnExpr Expr (Maybe ColumnAlias)
