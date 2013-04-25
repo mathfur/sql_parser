@@ -4,11 +4,12 @@ import Type
 import ProcessSql
 import System.IO (getContents)
 import Control.Monad
-import Data.Char (toUpper)
+import Data.Char (toLower, toUpper)
 import Text.Printf (printf)
+import Data.List (intercalate)
 
 get_line_and_output :: IO ()
-get_line_and_output = do
+get_line_and_output = forever $ do
     sql <- getLine
     case (Parser.to_sql $ map toUpper sql) of
       Right e -> do
@@ -20,5 +21,14 @@ get_line_and_output = do
       Left e -> do
         putStrLn $ "NG: " ++ show sql
 
+get_table_names_from_sql :: IO ()
+get_table_names_from_sql = do
+    sql_string <- getLine
+    case (Parser.to_sql $ map toUpper sql_string) of
+      Right sql -> do
+        putStrLn $ intercalate ", " $ map (map toLower) $ get_all_tables sql
+      Left e -> do
+        putStrLn "(error)"
+
 main :: IO ()
-main = forever get_line_and_output
+main = get_table_names_from_sql
